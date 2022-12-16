@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="es-CL">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+  <title>Aplicaciones IoT</title>
+</head>
+
+<body>
+  <div class="container-fluid">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-8 col-lg-12 pb-5">
+        <div class="card rounded-0">
+          <div class="card-header">
+            <h3 class="mb-0">Evaluación 4</h3>
+            <div>
+              <p>Presentación de la aplicación IoT</p>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="embed-responsive embed-responsive-16by9">
+              <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/P676uFUu7KU"
+                allowfullscreen></iframe>
+            </div>
+            <br>
+            <div class="alert alert-secondary" role="alert">
+              <p>si no se puede ver el video, porfavor presionar en el link:
+                <a href="https://youtu.be/P676uFUu7KU" target="_blank" rel="noopener noreferrer">presione aquí.</a>
+              </p>
+            </div>
+            <div class="alert alert-secondary" role="alert">
+              <p>Realizado por:</p>
+              <ul>
+                <li>Eric Aguayo Quintriqueo</li>
+                <li>Patricio Antinao Guairao</li>
+                <li>Francisco Caurapan Gonzalez</li>
+              </ul>
+            </div>
+            <div class="alert alert-dark" role="alert">
+              <div class="text-center">
+                <h6 class="display-4"><strong>Código de la aplicación:</strong></h6>
+                <button class="btn btn-success" onclick="copyToClipboard('code-block')">Copiar código</button>
+              </div>
+              <pre id="code-block">
+                <code>
+                  // Parlante
+                  const int buzzerPin = 9;
+                  // LEDs
+                  const int ledRojo = 13;
+                  const int ledAzul = 12;
+                  const int ledVerde = 11;
+                  // Potenciómetro y LDR
+                  const int potPin = A0;
+                  const int ldrPin = A1;
+                  
+                  // Variables auxiliares
+                  int potValue;
+                  int ldrValue;
+                  int mappedValue;
+                  char op;
+                  int count;
+                  
+                  // Declaración de las funciones
+                  void encenderLEDRojo();
+                  void encenderLEDAzul();
+                  void encenderTodosLosLEDs();
+                  void encenderLEDs(unsigned long tiempo = 0)
+                  {
+                    digitalWrite(ledRojo, HIGH);
+                    digitalWrite(ledAzul, HIGH);
+                    digitalWrite(ledVerde, HIGH);
+                    if (tiempo > 0)
+                    {
+                      delay(tiempo);
+                    }
+                  }
+                  
+                  void apagarLEDs(unsigned long tiempo = 0)
+                  {
+                    digitalWrite(ledRojo, LOW);
+                    digitalWrite(ledAzul, LOW);
+                    digitalWrite(ledVerde, LOW);
+                    if (tiempo > 0)
+                    {
+                      delay(tiempo);
+                    }
+                  }
+                  
+                  void setup()
+                  {
+                      // Configurar el pin del parlante como salida
+                      pinMode(buzzerPin, OUTPUT);
+                      // Configurar los pins de los LEDs como salida
+                      pinMode(ledVerde, OUTPUT);
+                      pinMode(ledAzul, OUTPUT);
+                      pinMode(ledRojo, OUTPUT);
+                      // Iniciar el puerto serie
+                      Serial.begin(9600);
+                  
+                      // Mostrar el mensaje de ingreso de un número
+                      Serial.println("Ingrese un numero del 1 al 3: ");
+                  }
+                  
+                  void loop()
+                  {
+                      // Lee el valor del potenciómetro y del LDR
+                      potValue = analogRead(potPin);
+                      ldrValue = analogRead(ldrPin);
+                  
+                      // Comprobar si hay datos disponibles en el puerto serie
+                      if (Serial.available() > 0)
+                      {
+                          // Leer el valor del teclado
+                          op = Serial.read();
+                  
+                          // Verifica si se ha ingresado un número del 1 al 3
+                          switch (op)
+                          {
+                          case '1':
+                              // Ejecutar la función encenderLEDRojo
+                              encenderLEDRojo();
+                              break;
+                          case '2':
+                              // Ejecutar la función encenderLEDAzul
+                              encenderLEDAzul();
+                              break;
+                          case '3':
+                              // Ejecutar la función encenderTodosLosLEDs
+                              encenderTodosLosLEDs();
+                              break;
+                  
+                          // Valor por defecto en caso de elegir un número que no está en la sugerencia
+                          default:
+                              // Mostrar el mensaje de ingreso de un número inválido
+                              Serial.println("Ingrese un valor valido: ");
+                              break;
+                          }
+                      }
+                  }
+                  
+                  void encenderLEDRojo()
+                  {
+                      // Encender el LED rojo, apagar los otros LEDs y generar un tono en el parlante
+                      digitalWrite(ledRojo, HIGH);
+                      digitalWrite(ledAzul, LOW);
+                      digitalWrite(ledVerde, LOW);
+                  
+                      // Inicializar la variable count en cero
+                      count = 0;
+                  
+                      // Bucle que se ejecuta continuamente
+                      while (true)
+                      {
+                          // Leer el valor del potenciómetro
+                          potValue = analogRead(potPin);
+                  
+                          // Convertir el valor del potenciómetro en un valor entre 0 y 255
+                          mappedValue = map(potValue, 0, 1023, 0, 255);
+                  
+                          // Generar un tono en el buzzer con la frecuencia calculada
+                          if (mappedValue > 10)
+                          {
+                              tone(buzzerPin, potValue);
+                          }
+                          else
+                          {
+                              noTone(buzzerPin);
+                          }
+                  
+                          // Esperar 10 milisegundos
+                          delay(10);
+                  
+                          // Comprobar si count es igual a cero
+                          if (count == 0)
+                          {
+                              // Mostrar el mensaje de ingreso de un número
+                              Serial.println("Ingrese un numero del 1 al 3: --1--");
+                  
+                              // Actualizar la variable count con uno
+                              count = count + 1;
+                          }
+                  
+                          // Comprobar si hay datos disponibles en el puerto serie
+                          if (Serial.available())
+                          {
+                              // Leer el valor del teclado
+                              op = Serial.read();
+                  
+                              // Verificar si se ha ingresado un número diferente de 1
+                              if (op != '1')
+                              {
+                                  // Salir del bucle
+                                  break;
+                              }
+                          }
+                      }
+                  }
+                  void encenderLEDAzul()
+                  {
+                      // Encender el LED azul, apagar los otros LEs y generar un tono en el parlante
+                      digitalWrite(ledRojo, LOW);
+                      digitalWrite(ledAzul, HIGH);
+                      digitalWrite(ledVerde, LOW);
+                  
+                      // Inicializar la variable count en cero
+                      count = 0;
+                  
+                      // Bucle que se ejecuta continuamente
+                      while (true)
+                      {
+                          // Leer el valor del potenciómetro
+                          ldrValue = analogRead(ldrPin);
+                  
+                          // Convertir el valor del potenciómetro en un valor entre 0 y 255
+                          mappedValue = map(ldrValue, 0, 1023, 0, 255);
+                  
+                          // Generar un tono en el buzzer con la frecuencia calculada
+                          if (mappedValue > 10)
+                          {
+                              tone(buzzerPin, ldrValue);
+                          }
+                          else
+                          {
+                              noTone(buzzerPin);
+                          }
+                  
+                          // Esperar 10 milisegundos
+                          delay(10);
+                  
+                          // Comprobar si count es igual a cero
+                          if (count == 0)
+                          {
+                              // Mostrar el mensaje de ingreso de un número
+                              Serial.println("Ingrese un numero del 1 al 3: --2--");
+                  
+                              // Actualizar la variable count con uno
+                              count = count + 1;
+                          }
+                  
+                          // Comprobar si hay datos disponibles en el puerto serie
+                          if (Serial.available())
+                          {
+                              // Leer el valor del teclado
+                              op = Serial.read();
+                  
+                              // Verificar si se ha ingresado un número diferente de 2
+                              if (op != '2')
+                              {	
+                                  // Sllenciamos el parlante
+                                  noTone(buzzerPin);
+                                  // Apagar LEDS
+                            apagarLEDs();
+                                  // Salir del bucle
+                                  break;
+                              }
+                          }
+                      }
+                  }
+                  void encenderTodosLosLEDs()
+                  {
+                    // Encender leds 5s
+                    encenderLEDs(5000);
+                  
+                    // Apagar 1s
+                    apagarLEDs(1000);
+                  
+                    // Encender leds 2s
+                    encenderLEDs(2000);
+                  
+                    // Apagar
+                    apagarLEDs();
+                  
+                    // Comprobar si hay datos disponibles en el puerto serie
+                    if (Serial.available())
+                    {
+                      // Leer el valor del teclado
+                      op = Serial.read();
+                  
+                      // Verificar si se ha ingresado un número diferente de 3
+                      if (op != '3')
+                      {
+                        return;
+                      }
+                    }
+                  }                  
+              </code>
+            </pre>
+              <script>
+                function copyToClipboard(elementId) {
+                  var element = document.getElementById(elementId);
+                  var range = document.createRange();
+                  range.selectNode(element);
+                  window.getSelection().addRange(range);
+                  document.execCommand("copy");
+                  window.getSelection().removeAllRanges();
+                }
+              </script>
+            </div>
+            <div class="text-center">
+              <h6 class="display-4"><strong>Circuito</strong></h6>
+            </div>
+            <div class="col-sm-12">
+              <img src="img/ArduinoMaqueta.png" class="img-fluid" alt="arduino">
+            </div>
+            <br>
+            <div class="col-sm-12">
+              <a href="#top" class="btn btn-success btn-lg active" role="button" aria-pressed="true">subir</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
